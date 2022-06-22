@@ -18,4 +18,7 @@ export interface CustomNetwork {
     usdc?: Token | undefined;
     wbtc?: Token | undefined;
   };
+  customBaseTokens?: {
+    [key: string] : Token
+  }
 }

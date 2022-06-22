@@ -80,7 +80,7 @@ export class UniswapRouterFactory {
     private _toToken: Token,
     private _settings: UniswapPairSettings,
     private _ethersProvider: EthersProvider
-  ) {}
+  ) { }
 
   /**
    * Get all possible routes will only go up to 4 due to gas increase the more routes
@@ -99,6 +99,7 @@ export class UniswapRouterFactory {
         this.mainCurrenciesPairsForUSDC,
         this.mainCurrenciesPairsForWETH,
         this.mainCurrenciesPairsForWBTC,
+        this.mainCurrenciesPairsForCustomTokens,
         [[this._fromToken, this._toToken]],
       ];
     } else {
@@ -817,17 +818,17 @@ export class UniswapRouterFactory {
       direction === TradeDirection.input
         ? this.hasGotEnoughAllowance(amountToTrade.toFixed(), allowanceAndBalancesForTokens.fromToken.allowanceV2)
         : this.hasGotEnoughAllowance(
-            bestRouteQuote.expectedConvertQuote,
-            allowanceAndBalancesForTokens.fromToken.allowanceV2
-          );
+          bestRouteQuote.expectedConvertQuote,
+          allowanceAndBalancesForTokens.fromToken.allowanceV2
+        );
 
     const enoughV3Allowance =
       direction === TradeDirection.input
         ? this.hasGotEnoughAllowance(amountToTrade.toFixed(), allowanceAndBalancesForTokens.fromToken.allowanceV3)
         : this.hasGotEnoughAllowance(
-            bestRouteQuote.expectedConvertQuote,
-            allowanceAndBalancesForTokens.fromToken.allowanceV3
-          );
+          bestRouteQuote.expectedConvertQuote,
+          allowanceAndBalancesForTokens.fromToken.allowanceV3
+        );
 
     return {
       enoughV2Allowance,
@@ -914,9 +915,9 @@ export class UniswapRouterFactory {
 
         let bestRoute:
           | {
-              routeQuote: RouteQuote;
-              expectedConvertQuoteMinusTxFees: BigNumber;
-            }
+            routeQuote: RouteQuote;
+            expectedConvertQuoteMinusTxFees: BigNumber;
+          }
           | undefined;
         for (let i = 0; i < bestRouteQuoteHops.length; i++) {
           const route = bestRouteQuoteHops[i];
@@ -1269,17 +1270,17 @@ export class UniswapRouterFactory {
     const data =
       direction === TradeDirection.input
         ? this.generateTradeDataErc20ToErc20Input(
-            amountToTrade,
-            new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
-            routeQuoteTradeContext,
-            tradeExpires.toString()
-          )
+          amountToTrade,
+          new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
+          routeQuoteTradeContext,
+          tradeExpires.toString()
+        )
         : this.generateTradeDataErc20ToErc20Output(
-            new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
-            amountToTrade,
-            routeQuoteTradeContext,
-            tradeExpires.toString()
-          );
+          new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
+          amountToTrade,
+          routeQuoteTradeContext,
+          tradeExpires.toString()
+        );
 
     const transaction = this.buildUpTransactionErc20(uniswapVersion, data);
 
@@ -1355,17 +1356,17 @@ export class UniswapRouterFactory {
     const data =
       direction === TradeDirection.input
         ? this.generateTradeDataEthToErc20Input(
-            amountToTrade,
-            new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
-            routeQuoteTradeContext,
-            tradeExpires.toString()
-          )
+          amountToTrade,
+          new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
+          routeQuoteTradeContext,
+          tradeExpires.toString()
+        )
         : this.generateTradeDataEthToErc20Output(
-            new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
-            amountToTrade,
-            routeQuoteTradeContext,
-            tradeExpires.toString()
-          );
+          new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
+          amountToTrade,
+          routeQuoteTradeContext,
+          tradeExpires.toString()
+        );
 
     const transaction = this.buildUpTransactionEth(
       uniswapVersion,
@@ -1412,9 +1413,8 @@ export class UniswapRouterFactory {
             turnTokenIntoEthForResponse(this._fromToken, this._settings?.customNetwork?.nativeCurrency),
             this._toToken,
           ],
-          routeText: `${
-            turnTokenIntoEthForResponse(this._fromToken, this._settings?.customNetwork?.nativeCurrency).symbol
-          } > ${this._toToken.symbol}`,
+          routeText: `${turnTokenIntoEthForResponse(this._fromToken, this._settings?.customNetwork?.nativeCurrency).symbol
+            } > ${this._toToken.symbol}`,
           routePathArray: [this._fromToken.contractAddress, this._toToken.contractAddress],
           uniswapVersion,
           liquidityProviderFee: routeContext.liquidityProviderFee,
@@ -1458,17 +1458,17 @@ export class UniswapRouterFactory {
     const data =
       direction === TradeDirection.input
         ? this.generateTradeDataErc20ToEthInput(
-            amountToTrade,
-            new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
-            routeQuoteTradeContext,
-            tradeExpires.toString()
-          )
+          amountToTrade,
+          new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
+          routeQuoteTradeContext,
+          tradeExpires.toString()
+        )
         : this.generateTradeDataErc20ToEthOutput(
-            new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
-            amountToTrade,
-            routeQuoteTradeContext,
-            tradeExpires.toString()
-          );
+          new BigNumber(expectedConvertQuoteOrTokenAmountInMaxWithSlippage),
+          amountToTrade,
+          routeQuoteTradeContext,
+          tradeExpires.toString()
+        );
 
     const transaction = this.buildUpTransactionErc20(uniswapVersion, data);
 
@@ -1511,9 +1511,8 @@ export class UniswapRouterFactory {
             this._fromToken,
             turnTokenIntoEthForResponse(this._toToken, this._settings?.customNetwork?.nativeCurrency),
           ],
-          routeText: `${this._fromToken.symbol} > ${
-            turnTokenIntoEthForResponse(this._toToken, this._settings?.customNetwork?.nativeCurrency).symbol
-          }`,
+          routeText: `${this._fromToken.symbol} > ${turnTokenIntoEthForResponse(this._toToken, this._settings?.customNetwork?.nativeCurrency).symbol
+            }`,
           routePathArray: [this._fromToken.contractAddress, this._toToken.contractAddress],
           uniswapVersion,
           liquidityProviderFee: routeContext.liquidityProviderFee,
@@ -1633,6 +1632,9 @@ export class UniswapRouterFactory {
         this.WETHTokenForConnectedNetwork,
         this.WBTCTokenForConnectedNetwork,
       ];
+      for (const token of this.CustomTokensForConnectedNetwork) {
+        tokens.push(token)
+      }
 
       return tokens.filter((t) => t !== undefined) as Token[];
     }
@@ -1649,6 +1651,9 @@ export class UniswapRouterFactory {
         [this._fromToken, this.DAITokenForConnectedNetwork],
         [this._fromToken, this.WBTCTokenForConnectedNetwork],
       ];
+      for (const token of this.CustomTokensForConnectedNetwork) {
+        pairs.push([this._fromToken, token])
+      }
 
       if (!isNativeEth(this._fromToken.contractAddress) && !isNativeEth(this._toToken.contractAddress)) {
         pairs.push([this._fromToken, this.WETHTokenForConnectedNetwork]);
@@ -1671,6 +1676,10 @@ export class UniswapRouterFactory {
         [this.WBTCTokenForConnectedNetwork, this._toToken],
       ];
 
+      for (const token of this.CustomTokensForConnectedNetwork) {
+        pairs.push([token, this._toToken])
+      }
+
       if (!isNativeEth(this._toToken.contractAddress) && !isNativeEth(this._toToken.contractAddress)) {
         pairs.push([this.WETHTokenForConnectedNetwork, this._toToken]);
       }
@@ -1691,6 +1700,10 @@ export class UniswapRouterFactory {
         [this.USDTTokenForConnectedNetwork, this.USDCTokenForConnectedNetwork],
         [this.USDTTokenForConnectedNetwork, this.WBTCTokenForConnectedNetwork],
       ];
+
+      for (const token of this.CustomTokensForConnectedNetwork) {
+        pairs.push([this.USDTTokenForConnectedNetwork, token])
+      }
 
       if (!isNativeEth(this._fromToken.contractAddress) && !isNativeEth(this._toToken.contractAddress)) {
         pairs.push([this.USDTTokenForConnectedNetwork, this.WETHTokenForConnectedNetwork]);
@@ -1729,6 +1742,10 @@ export class UniswapRouterFactory {
         [this.DAITokenForConnectedNetwork, this.USDCTokenForConnectedNetwork],
       ];
 
+      for (const token of this.CustomTokensForConnectedNetwork) {
+        pairs.push([this.USDTTokenForConnectedNetwork, token])
+      }
+
       if (!isNativeEth(this._fromToken.contractAddress) && !isNativeEth(this._toToken.contractAddress)) {
         pairs.push([this.DAITokenForConnectedNetwork, this.WETHTokenForConnectedNetwork]);
       }
@@ -1747,6 +1764,10 @@ export class UniswapRouterFactory {
         [this.USDCTokenForConnectedNetwork, this.DAITokenForConnectedNetwork],
         [this.USDCTokenForConnectedNetwork, this.WBTCTokenForConnectedNetwork],
       ];
+
+      for (const token of this.CustomTokensForConnectedNetwork) {
+        pairs.push([this.USDTTokenForConnectedNetwork, token])
+      }
 
       if (!isNativeEth(this._fromToken.contractAddress) && !isNativeEth(this._toToken.contractAddress)) {
         pairs.push([this.USDCTokenForConnectedNetwork, this.WETHTokenForConnectedNetwork]);
@@ -1783,7 +1804,34 @@ export class UniswapRouterFactory {
         [this.WETHTokenForConnectedNetwork, this.WBTCTokenForConnectedNetwork],
       ];
 
+      for (const token of this.CustomTokensForConnectedNetwork) {
+        tokens.push([this.WETHTokenForConnectedNetwork, token])
+      }
+
       return this.filterUndefinedTokens(tokens);
+    }
+
+    return [];
+  }
+
+  private get mainCurrenciesPairsForCustomTokens(): Token[][] {
+    if (this._ethersProvider.provider.network.chainId === ChainId.MAINNET || this._settings.customNetwork) {
+      const pairs = []
+      for (const token of this.CustomTokensForConnectedNetwork) {
+        pairs.push(
+          [token, this.USDTTokenForConnectedNetwork],
+          [token, this.COMPTokenForConnectedNetwork],
+          [token, this.DAITokenForConnectedNetwork],
+          [token, this.USDCTokenForConnectedNetwork],
+          [token, this.WBTCTokenForConnectedNetwork]
+        )
+
+        if (!isNativeEth(this._fromToken.contractAddress) && !isNativeEth(this._toToken.contractAddress)) {
+          pairs.push([token, this.WETHTokenForConnectedNetwork]);
+        }
+      }
+
+      return this.filterUndefinedTokens(pairs);
     }
 
     return [];
@@ -1839,6 +1887,14 @@ export class UniswapRouterFactory {
     }
 
     return WBTC.token(this._ethersProvider.provider.network.chainId);
+  }
+
+  private get CustomTokensForConnectedNetwork() {
+    if (this._settings.customNetwork && this._settings.customNetwork.customBaseTokens) {
+      return Object.values(this._settings.customNetwork.customBaseTokens);
+    }
+
+    return []
   }
 
   private getNativeTokenSymbol(): string {
