@@ -19,4 +19,9 @@ export enum ErrorCodes {
   chainIdNotSupported = 18,
   chainIdCanNotBeFound = 19,
   uniswapVersionsUnsupported = 20,
+  tokenAContractAddressRequired = 21,
+  tokenAContractAddressNotValid = 22,
+  tokenBContractAddressRequired = 23,
+  tokenBContractAddressNotValid = 24,
+  invalidQuoterContext = 25,
 }
