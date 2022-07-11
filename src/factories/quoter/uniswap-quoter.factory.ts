@@ -213,8 +213,8 @@ export class UniswapQuoterFactory {
             reference: `route${i}-${amountToTrade.toString()}-ask`,
             methodName: "quoteExactOutputSingle",
             methodParameters: [
-              routeCombo[1],
               routeCombo[0],
+              routeCombo[1],
               percentToFeeAmount(routesBtoA.v3[i].liquidityProviderFee),
               tradeAmount,
               0,
