@@ -1,64 +1,64 @@
-import BigNumber from "bignumber.js";
+import BigNumber from 'bignumber.js';
 import {
   CallReturnContext,
   ContractCallContext,
   ContractCallResults,
-} from "ethereum-multicall";
+} from 'ethereum-multicall';
 import {
   ExactInputSingleRequest,
   ExactOutputSingleRequest,
-} from "../../ABI/types/uniswap-router-v3";
-import { CoinGecko } from "../../coin-gecko";
-import { Constants } from "../../common/constants";
-import { ErrorCodes } from "../../common/errors/error-codes";
-import { UniswapError } from "../../common/errors/uniswap-error";
-import { COMP } from "../../common/tokens/comp";
-import { DAI } from "../../common/tokens/dai";
+} from '../../ABI/types/uniswap-router-v3';
+import { CoinGecko } from '../../coin-gecko';
+import { Constants } from '../../common/constants';
+import { ErrorCodes } from '../../common/errors/error-codes';
+import { UniswapError } from '../../common/errors/uniswap-error';
+import { COMP } from '../../common/tokens/comp';
+import { DAI } from '../../common/tokens/dai';
 import {
   ETH_SYMBOL,
   isNativeEth,
   removeEthFromContractAddress,
   turnTokenIntoEthForResponse,
-} from "../../common/tokens/eth";
-import { USDC } from "../../common/tokens/usdc";
-import { USDT } from "../../common/tokens/usdt";
-import { WBTC } from "../../common/tokens/wbtc";
-import { WETHContract } from "../../common/tokens/weth";
-import { deepClone } from "../../common/utils/deep-clone";
-import { formatEther } from "../../common/utils/format-ether";
-import { hexlify } from "../../common/utils/hexlify";
-import { onlyUnique } from "../../common/utils/only-unique";
-import { parseEther } from "../../common/utils/parse-ether";
-import { toEthersBigNumber } from "../../common/utils/to-ethers-big-number";
-import { getTradePath } from "../../common/utils/trade-path";
-import { CustomMulticall } from "../../custom-multicall";
-import { ChainId } from "../../enums/chain-id";
-import { TradePath } from "../../enums/trade-path";
-import { UniswapVersion } from "../../enums/uniswap-version";
-import { EthersProvider } from "../../ethers-provider";
-import { uniswapContracts } from "../../uniswap-contract-context/get-uniswap-contracts";
-import { UniswapContractContextV2 } from "../../uniswap-contract-context/uniswap-contract-context-v2";
-import { UniswapContractContextV3 } from "../../uniswap-contract-context/uniswap-contract-context-v3";
-import { TradeDirection } from "../pair/models/trade-direction";
-import { Transaction } from "../pair/models/transaction";
-import { UniswapPairSettings } from "../pair/models/uniswap-pair-settings";
-import { AllowanceAndBalanceOf } from "../token/models/allowance-balance-of";
-import { Token } from "../token/models/token";
-import { TokensFactory } from "../token/tokens.factory";
-import { RouterDirection } from "./enums/router-direction";
-import { AllPossibleRoutes } from "./models/all-possible-routes";
-import { BestRouteQuotes } from "./models/best-route-quotes";
-import { RouteContext } from "./models/route-context";
-import { RouteQuote } from "./models/route-quote";
-import { RouteQuoteTradeContext } from "./models/route-quote-trade-context";
-import { TokenRoutes } from "./models/token-routes";
-import { UniswapRouterContractFactoryV2 } from "./v2/uniswap-router-contract.factory.v2";
+} from '../../common/tokens/eth';
+import { USDC } from '../../common/tokens/usdc';
+import { USDT } from '../../common/tokens/usdt';
+import { WBTC } from '../../common/tokens/wbtc';
+import { WETHContract } from '../../common/tokens/weth';
+import { deepClone } from '../../common/utils/deep-clone';
+import { formatEther } from '../../common/utils/format-ether';
+import { hexlify } from '../../common/utils/hexlify';
+import { onlyUnique } from '../../common/utils/only-unique';
+import { parseEther } from '../../common/utils/parse-ether';
+import { toEthersBigNumber } from '../../common/utils/to-ethers-big-number';
+import { getTradePath } from '../../common/utils/trade-path';
+import { CustomMulticall } from '../../custom-multicall';
+import { ChainId } from '../../enums/chain-id';
+import { TradePath } from '../../enums/trade-path';
+import { UniswapVersion } from '../../enums/uniswap-version';
+import { EthersProvider } from '../../ethers-provider';
+import { uniswapContracts } from '../../uniswap-contract-context/get-uniswap-contracts';
+import { UniswapContractContextV2 } from '../../uniswap-contract-context/uniswap-contract-context-v2';
+import { UniswapContractContextV3 } from '../../uniswap-contract-context/uniswap-contract-context-v3';
+import { TradeDirection } from '../pair/models/trade-direction';
+import { Transaction } from '../pair/models/transaction';
+import { UniswapPairSettings } from '../pair/models/uniswap-pair-settings';
+import { AllowanceAndBalanceOf } from '../token/models/allowance-balance-of';
+import { Token } from '../token/models/token';
+import { TokensFactory } from '../token/tokens.factory';
+import { RouterDirection } from './enums/router-direction';
+import { AllPossibleRoutes } from './models/all-possible-routes';
+import { BestRouteQuotes } from './models/best-route-quotes';
+import { RouteContext } from './models/route-context';
+import { RouteQuote } from './models/route-quote';
+import { RouteQuoteTradeContext } from './models/route-quote-trade-context';
+import { TokenRoutes } from './models/token-routes';
+import { UniswapRouterContractFactoryV2 } from './v2/uniswap-router-contract.factory.v2';
 import {
   FeeAmount,
   feeToPercent,
   percentToFeeAmount,
-} from "./v3/enums/fee-amount-v3";
-import { UniswapRouterContractFactoryV3 } from "./v3/uniswap-router-contract.factory.v3";
+} from './v3/enums/fee-amount-v3';
+import { UniswapRouterContractFactoryV3 } from './v3/uniswap-router-contract.factory.v3';
 
 export class UniswapRouterFactory {
   private _multicall = new CustomMulticall(
@@ -89,6 +89,8 @@ export class UniswapRouterFactory {
   private _allPossibleRoutes: AllPossibleRoutes = { v2: [], v3: [] };
 
   private readonly LIQUIDITY_PROVIDER_FEE_V2 = 0.003;
+
+  expectedParamQuoteOrTokenAmountInMaxWithSlippage?: string;
 
   constructor(
     private _coinGecko: CoinGecko,
@@ -155,7 +157,7 @@ export class UniswapRouterFactory {
           const toToken = findPairs[pairs][tokenPairs][1];
           contractCallContext[0].calls.push({
             reference: `${fromToken.contractAddress}-${toToken.contractAddress}-${fromToken.symbol}/${toToken.symbol}`,
-            methodName: "getPair",
+            methodName: 'getPair',
             methodParameters: [
               removeEthFromContractAddress(fromToken.contractAddress),
               removeEthFromContractAddress(toToken.contractAddress),
@@ -176,7 +178,7 @@ export class UniswapRouterFactory {
         calls: [
           {
             reference: `${this._fromToken.contractAddress}-${this._toToken.contractAddress}-${this._fromToken.symbol}/${this._toToken.symbol}`,
-            methodName: "getPool",
+            methodName: 'getPool',
             methodParameters: [
               removeEthFromContractAddress(this._fromToken.contractAddress),
               removeEthFromContractAddress(this._toToken.contractAddress),
@@ -185,7 +187,7 @@ export class UniswapRouterFactory {
           },
           {
             reference: `${this._fromToken.contractAddress}-${this._toToken.contractAddress}-${this._fromToken.symbol}/${this._toToken.symbol}`,
-            methodName: "getPool",
+            methodName: 'getPool',
             methodParameters: [
               removeEthFromContractAddress(this._fromToken.contractAddress),
               removeEthFromContractAddress(this._toToken.contractAddress),
@@ -194,7 +196,7 @@ export class UniswapRouterFactory {
           },
           {
             reference: `${this._fromToken.contractAddress}-${this._toToken.contractAddress}-${this._fromToken.symbol}/${this._toToken.symbol}`,
-            methodName: "getPool",
+            methodName: 'getPool',
             methodParameters: [
               removeEthFromContractAddress(this._fromToken.contractAddress),
               removeEthFromContractAddress(this._toToken.contractAddress),
@@ -214,7 +216,7 @@ export class UniswapRouterFactory {
 
       const availablePairs = results.callsReturnContext.filter(
         (c) =>
-          c.returnValues[0] !== "0x0000000000000000000000000000000000000000"
+          c.returnValues[0] !== '0x0000000000000000000000000000000000000000'
       );
 
       // console.log(JSON.stringify(results.callsReturnContext, null, 4));
@@ -282,7 +284,7 @@ export class UniswapRouterFactory {
       for (let i = 0; i < results.callsReturnContext.length; i++) {
         if (
           results.callsReturnContext[i].returnValues[0] !==
-          "0x0000000000000000000000000000000000000000"
+          '0x0000000000000000000000000000000000000000'
         ) {
           let liquidityProviderFee!: FeeAmount;
           switch (i) {
@@ -345,8 +347,8 @@ export class UniswapRouterFactory {
           reference: `route${i}`,
           methodName:
             direction === TradeDirection.input
-              ? "getAmountsOut"
-              : "getAmountsIn",
+              ? 'getAmountsOut'
+              : 'getAmountsIn',
           methodParameters: [tradeAmount, routeCombo],
         });
       }
@@ -374,8 +376,8 @@ export class UniswapRouterFactory {
           reference: `route${i}`,
           methodName:
             direction === TradeDirection.input
-              ? "quoteExactInputSingle"
-              : "quoteExactOutputSingle",
+              ? 'quoteExactInputSingle'
+              : 'quoteExactOutputSingle',
           methodParameters: [
             routeCombo[0],
             routeCombo[1],
@@ -520,7 +522,7 @@ export class UniswapRouterFactory {
         );
       default:
         throw new UniswapError(
-          "Uniswap version not supported",
+          'Uniswap version not supported',
           ErrorCodes.uniswapVersionNotSupported
         );
     }
@@ -562,7 +564,7 @@ export class UniswapRouterFactory {
         );
       default:
         throw new UniswapError(
-          "Uniswap version not supported",
+          'Uniswap version not supported',
           ErrorCodes.uniswapVersionNotSupported
         );
     }
@@ -606,7 +608,7 @@ export class UniswapRouterFactory {
         );
       default:
         throw new UniswapError(
-          "Uniswap version not supported",
+          'Uniswap version not supported',
           ErrorCodes.uniswapVersionNotSupported
         );
     }
@@ -650,7 +652,7 @@ export class UniswapRouterFactory {
         );
       default:
         throw new UniswapError(
-          "Uniswap version not supported",
+          'Uniswap version not supported',
           ErrorCodes.uniswapVersionNotSupported
         );
     }
@@ -695,7 +697,7 @@ export class UniswapRouterFactory {
         );
       default:
         throw new UniswapError(
-          "Uniswap version not supported",
+          'Uniswap version not supported',
           ErrorCodes.uniswapVersionNotSupported
         );
     }
@@ -741,7 +743,7 @@ export class UniswapRouterFactory {
         );
       default:
         throw new UniswapError(
-          "Uniswap version not supported",
+          'Uniswap version not supported',
           ErrorCodes.uniswapVersionNotSupported
         );
     }
@@ -769,7 +771,7 @@ export class UniswapRouterFactory {
       fee: percentToFeeAmount(liquidityProviderFee),
       recipient:
         isNativeReceivingNativeEth === true
-          ? "0x0000000000000000000000000000000000000000"
+          ? '0x0000000000000000000000000000000000000000'
           : this._ethereumAddress,
       deadline,
       amountIn: hexlify(tokenAmount),
@@ -817,7 +819,7 @@ export class UniswapRouterFactory {
       fee: percentToFeeAmount(liquidityProviderFee),
       recipient:
         isNativeReceivingNativeEth === true
-          ? "0x0000000000000000000000000000000000000000"
+          ? '0x0000000000000000000000000000000000000000'
           : this._ethereumAddress,
       deadline,
       amountOut: hexlify(amountOut),
@@ -1376,7 +1378,7 @@ export class UniswapRouterFactory {
     allAvailablePairs: CallReturnContext[]
   ): Token[] {
     const fromRouterDirection = allAvailablePairs.filter(
-      (c) => c.reference.split("-")[0] === token.contractAddress
+      (c) => c.reference.split('-')[0] === token.contractAddress
     );
     const tokens: Token[] = [];
 
@@ -1384,7 +1386,7 @@ export class UniswapRouterFactory {
       const context = fromRouterDirection[index];
       tokens.push(
         this.allTokens.find(
-          (t) => t.contractAddress === context.reference.split("-")[1]
+          (t) => t.contractAddress === context.reference.split('-')[1]
         )!
       );
     }
@@ -1397,7 +1399,7 @@ export class UniswapRouterFactory {
     allAvailablePairs: CallReturnContext[]
   ): Token[] {
     const toRouterDirection = allAvailablePairs.filter(
-      (c) => c.reference.split("-")[1] === token.contractAddress
+      (c) => c.reference.split('-')[1] === token.contractAddress
     );
     const tokens: Token[] = [];
 
@@ -1405,7 +1407,7 @@ export class UniswapRouterFactory {
       const context = toRouterDirection[index];
       tokens.push(
         this.allTokens.find(
-          (t) => t.contractAddress === context.reference.split("-")[0]
+          (t) => t.contractAddress === context.reference.split('-')[0]
         )!
       );
     }
@@ -1560,6 +1562,7 @@ export class UniswapRouterFactory {
             .toFixed(this._fromToken.decimals);
 
     const expectedConvertQuoteOrTokenAmountInMaxWithSlippage =
+      this.expectedParamQuoteOrTokenAmountInMaxWithSlippage ??
       this.getExpectedConvertQuoteOrTokenAmountInMaxWithSlippage(
         expectedConvertQuote,
         direction,
@@ -1607,7 +1610,7 @@ export class UniswapRouterFactory {
               return this.allTokens.find((t) => t.contractAddress === c)!
                 .symbol;
             })
-            .join(" > "),
+            .join(' > '),
           // route array is always in the 1 index of the method parameters
           routePathArray: callReturnContext.methodParameters[1],
           uniswapVersion,
@@ -1631,7 +1634,7 @@ export class UniswapRouterFactory {
           quoteDirection: direction,
         };
       default:
-        throw new UniswapError("Invalid uniswap version", uniswapVersion);
+        throw new UniswapError('Invalid uniswap version', uniswapVersion);
     }
   }
 
@@ -1665,6 +1668,7 @@ export class UniswapRouterFactory {
           );
 
     const expectedConvertQuoteOrTokenAmountInMaxWithSlippage =
+      this.expectedParamQuoteOrTokenAmountInMaxWithSlippage ??
       this.getExpectedConvertQuoteOrTokenAmountInMaxWithSlippage(
         expectedConvertQuote,
         direction,
@@ -1730,7 +1734,7 @@ export class UniswapRouterFactory {
               return this.allTokens.find((t) => t.contractAddress === c)!
                 .symbol;
             })
-            .join(" > "),
+            .join(' > '),
           // route array is always in the 1 index of the method parameters
           routePathArray: callReturnContext.methodParameters[1],
           uniswapVersion,
@@ -1765,7 +1769,7 @@ export class UniswapRouterFactory {
           quoteDirection: direction,
         };
       default:
-        throw new UniswapError("Invalid uniswap version", uniswapVersion);
+        throw new UniswapError('Invalid uniswap version', uniswapVersion);
     }
   }
 
@@ -1799,6 +1803,7 @@ export class UniswapRouterFactory {
             .toFixed(this._fromToken.decimals);
 
     const expectedConvertQuoteOrTokenAmountInMaxWithSlippage =
+      this.expectedParamQuoteOrTokenAmountInMaxWithSlippage ??
       this.getExpectedConvertQuoteOrTokenAmountInMaxWithSlippage(
         expectedConvertQuote,
         direction,
@@ -1858,7 +1863,7 @@ export class UniswapRouterFactory {
               return this.allTokens.find((t) => t.contractAddress === c)!
                 .symbol;
             })
-            .join(" > "),
+            .join(' > '),
           // route array is always in the 1 index of the method parameters
           routePathArray: callReturnContext.methodParameters[1],
           uniswapVersion,
@@ -1893,7 +1898,7 @@ export class UniswapRouterFactory {
           quoteDirection: direction,
         };
       default:
-        throw new UniswapError("Invalid uniswap version", uniswapVersion);
+        throw new UniswapError('Invalid uniswap version', uniswapVersion);
     }
   }
 
@@ -1922,7 +1927,7 @@ export class UniswapRouterFactory {
       case UniswapVersion.v3:
         return new BigNumber(callReturnContext.returnValues[0].hex);
       default:
-        throw new UniswapError("Invalid uniswap version", uniswapVersion);
+        throw new UniswapError('Invalid uniswap version', uniswapVersion);
     }
   }
 

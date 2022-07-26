@@ -159,9 +159,15 @@ export class UniswapPairFactory {
    */
   public async trade(
     amount: string,
-    direction: TradeDirection = TradeDirection.input
+    direction: TradeDirection = TradeDirection.input,
+    expectedParamQuoteOrTokenAmountInMaxWithSlippage?: string
   ): Promise<TradeContext> {
     this.destroy();
+
+    if (expectedParamQuoteOrTokenAmountInMaxWithSlippage != null) {
+      this._routes.expectedParamQuoteOrTokenAmountInMaxWithSlippage =
+        expectedParamQuoteOrTokenAmountInMaxWithSlippage;
+    }
 
     const trade = await this.executeTradePath(new BigNumber(amount), direction);
     this._currentTradeContext = this.buildCurrentTradeContext(trade);
