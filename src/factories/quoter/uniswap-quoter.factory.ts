@@ -92,10 +92,14 @@ export class UniswapQuoterFactory {
    * Get the best bid and ask quotes
    * @param amounts The amounts to trade
    */
-  public async getBestBidAskQuotes(amounts: string[]): Promise<BidAskQuote[]> {
+  public async getBestBidAskQuotes(
+    amounts: string[],
+    blockNumber?: string
+  ): Promise<{ quotes: BidAskQuote[]; blockNumber: number }> {
     this.destroy();
     const bestBidAskQuotes = await this.getAllPossibleBidAskRoutesWithQuotes(
-      amounts.map((amt) => new BigNumber(amt))
+      amounts.map((amt) => new BigNumber(amt)),
+      blockNumber
     );
 
     this.watchTradePrice();
@@ -107,8 +111,9 @@ export class UniswapQuoterFactory {
    * @param amountToTrade The amounts to trade
    */
   private async getAllPossibleBidAskRoutesWithQuotes(
-    amountsToTrade: BigNumber[]
-  ): Promise<BidAskQuote[]> {
+    amountsToTrade: BigNumber[],
+    blockNumber?: string
+  ): Promise<{ quotes: BidAskQuote[]; blockNumber: number }> {
     const contractCallContext: ContractCallContext<RouteContext[]>[] = [];
     const routesAtoB = await this.getAllPossibleAtoBRoutes();
     const routesBtoA = await this.getAllPossibleBtoARoutes();
@@ -224,7 +229,10 @@ export class UniswapQuoterFactory {
       }
     }
 
-    const contractCallResults = await this._multicall.call(contractCallContext);
+    const contractCallResults = await this._multicall.call(
+      contractCallContext,
+      { blockNumber }
+    );
     return this.buildBestBidAskQuotesFromResults(contractCallResults);
   }
 
@@ -257,7 +265,7 @@ export class UniswapQuoterFactory {
 
   private buildBestBidAskQuotesFromResults(
     contractCallResults: ContractCallResults
-  ): BidAskQuote[] {
+  ): { quotes: BidAskQuote[]; blockNumber: number } {
     const bestResults: Record<string, BidAskQuote> = {};
 
     for (const key in contractCallResults.results) {
@@ -307,7 +315,10 @@ export class UniswapQuoterFactory {
       }
     }
 
-    return Object.values(bestResults);
+    return {
+      quotes: Object.values(bestResults),
+      blockNumber: contractCallResults.blockNumber,
+    };
   }
 
   private buildBestRouteQuote(

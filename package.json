@@ -40,7 +40,7 @@
   "dependencies": {
     "bignumber.js": "^9.0.1",
     "ethereum-abi-types-generator": "^1.1.6",
-    "ethereum-multicall": "^2.7.0",
+    "ethereum-multicall": "^2.14.0",
     "ethers": "^5.0.26",
     "node-fetch": "^2.6.1",
     "rxjs": "^6.6.3"
